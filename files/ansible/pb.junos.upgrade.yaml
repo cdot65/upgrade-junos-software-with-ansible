@@ -1,0 +1,38 @@
+---
+  - hosts: "{{ device_name }}"
+    connection: local
+    gather_facts: false
+    become: false
+    collections:
+      - juniper.device
+    tasks:
+
+      ### --------------------------------
+      ### Upgrade the device running Junos
+      ### --------------------------------
+      - name: Execute a basic Junos software upgrade.
+        software:
+          # fyi: upgrade_server is stored in group_vars/all.yaml
+          remote_package: "http://{{ upgrade_server }}/images/{{ software_version }}"
+          reboot: true
+          validate: false
+        register: response
+
+      - name: Print the complete response.
+        debug:
+          var: response
+
+      ### ------------------------------------------------------------
+      ### WAIT FOR THE DEVICE TO RESPOND TO SSH
+      ### ------------------------------------------------------------
+      - name: Wait 400 seconds for port 830 to become open
+        wait_for:
+          port: 830
+          host: '{{ inventory_hostname }}'
+          delay: 400
+          sleep: 10
+          timeout: 600
+        vars:
+          ansible_connection: local
+        when:
+          - response['changed'] == true

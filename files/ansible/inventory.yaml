@@ -1,0 +1,9 @@
+---
+all:
+   children:
+      firewalls:
+         hosts:
+            Lafayette-fw1:
+               ansible_host: 192.168.105.136
+            Richmond-fw1:
+               ansible_host: 192.168.105.121
